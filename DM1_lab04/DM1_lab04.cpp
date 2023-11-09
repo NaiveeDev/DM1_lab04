@@ -3,10 +3,46 @@
 #include <Windows.h>
 #include <iostream>
 
-
 using std::cout; using std::cin; using std::endl;
-using std::vector; using std::string; 
+using std::vector; using std::string;
 
+void PrintMatrix(const std::vector<std::vector<int>>& matrix) {
+    for (const auto& row : matrix) {
+        for (int element : row) {
+            std::cout << element << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+void ReflexiveClosure(std::vector<std::vector<int>>& matrix) {
+    for (int i = 0; i < matrix.size(); ++i) {
+        matrix[i][i] = 1;
+    }
+}
+
+void SymmetricClosure(std::vector<std::vector<int>>& matrix) {
+    for (int i = 0; i < matrix.size(); ++i) {
+        for (int j = i + 1; j < matrix[i].size(); ++j) {
+            if (matrix[i][j] == 1 || matrix[j][i] == 1) {
+                matrix[i][j] = matrix[j][i] = 1;
+            }
+        }
+    }
+}
+
+
+void TransitiveClosure(std::vector<std::vector<int>>& matrix) {
+    for (int k = 0; k < matrix.size(); ++k) {
+        for (int i = 0; i < matrix.size(); ++i) {
+            for (int j = 0; j < matrix.size(); ++j) {
+                if (matrix[i][k] && matrix[k][j]) {
+                    matrix[i][j] = 1;
+                }
+            }
+        }
+    }
+}
 
 void PrintMatrix(vector<vector<int>>& matrix) {
     for (int i = 0; i < matrix.size(); i++) {
@@ -15,6 +51,17 @@ void PrintMatrix(vector<vector<int>>& matrix) {
         }
         cout << endl;
     }
+}
+
+bool isAntisymmetric(vector<vector<int>>& matrix) {
+    for (int i = 0; i < matrix.size(); i++) {
+        for (int j = 0; j < matrix[i].size(); j++) {
+            if (i != j && matrix[i][j] == 1 && matrix[j][i] == 1) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 bool isReflexive(vector<vector<int>>& matrix) {
@@ -65,12 +112,21 @@ vector<vector<int>> FindSquare(vector<vector<int>>& matrix) {
 }
 
 vector<vector<int>> FindCube(vector<vector<int>>& matrix) {
-    
     vector<vector<int>> MatrixSquare = FindSquare(matrix);
     return FindSquare(MatrixSquare);
-    
 }
 
+bool isStrictOrder(vector<vector<int>>& matrix) {
+    return isAntisymmetric(matrix) && isTransitive(matrix);
+}
+
+bool isPartialOrder(vector<vector<int>>& matrix) {
+    return isReflexive(matrix) && isAntisymmetric(matrix) && isTransitive(matrix);
+}
+
+bool isEquivalenceRelation(vector<vector<int>>& matrix) {
+    return isReflexive(matrix) && isSymmetric(matrix) && isTransitive(matrix);
+}
 int main() {
 
     SetConsoleCP(1251);
@@ -90,18 +146,32 @@ int main() {
     cout << "Початкова матриця:" << endl;
     PrintMatrix(matrix);
 
-    cout << (isReflexive(matrix) ? "Відношення є рефлексивним" : "Відношення не є рефлексивним") << endl;
+    /*cout << (isReflexive(matrix) ? "Відношення є рефлексивним" : "Відношення не є рефлексивним") << endl;
     cout << (isSymmetric(matrix) ? "Відношення є симетричним" : "Відношення не є симетричним") << endl;
     cout << (isTransitive(matrix) ? "Відношення є транзитивним" : "Відношення не є транзитивним") << endl;
 
 
-    vector<vector<int>> MatrixSquare = FindSquare(matrix);
+    vector<vector<bool>> MatrixSquare = FindSquare(matrix);
     cout << "Квадрат відношення:" << endl;
     PrintMatrix(MatrixSquare);
 
-    vector<vector<int>> MatrixCube = FindCube(matrix);
+    vector<vector<bool>> MatrixCube = FindCube(matrix);
     cout << "Куб відношення:" << endl;
-    PrintMatrix(MatrixCube);
+    PrintMatrix(MatrixCube);*/
+
+    ReflexiveClosure(matrix);
+    std::cout << "\nРефлексивне замикання:" << std::endl;
+    PrintMatrix(matrix);
+
+    std::vector<std::vector<int>> SymmetricMatrix = matrix;
+    SymmetricClosure(SymmetricMatrix);
+    std::cout << "\nСиметричне замикання:" << std::endl;
+    //PrintMatrix(SymmetricMatrix);
+
+    std::vector<std::vector<int>> TransitiveMatrix = matrix;
+    TransitiveClosure(TransitiveMatrix);
+    std::cout << "\nТранзитивне замикання:" << std::endl;
+    PrintMatrix(TransitiveMatrix);
 
     return 0;
 }
